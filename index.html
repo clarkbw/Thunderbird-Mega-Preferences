@@ -1,78 +1,202 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="mega-prefs.css"/>
 
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.4/jquery-ui.min.js"></script>
 
-	<title>clarkbw/Thunderbird-Mega-Preferences @ GitHub</title>
-	
-	<style type="text/css">
-		body {
-  		margin-top: 1.0em;
-  		background-color: #e0e0e0;
-		  font-family: "Helvetica,Arial,FreeSans";
-  		color: #000000;
-    }
-    #container {
-      margin: 0 auto;
-      width: 700px;
-    }
-		h1 { font-size: 3.8em; color: #1f1f1f; margin-bottom: 3px; }
-		h1 .small { font-size: 0.4em; }
-		h1 a { text-decoration: none }
-		h2 { font-size: 1.5em; color: #1f1f1f; }
-    h3 { text-align: center; color: #1f1f1f; }
-    a { color: #1f1f1f; }
-    .description { font-size: 1.2em; margin-bottom: 30px; margin-top: 30px; font-style: italic;}
-    .download { float: right; }
-		pre { background: #000; color: #fff; padding: 15px;}
-    hr { border: 0; width: 80%; border-bottom: 1px solid #aaa}
-    .footer { text-align:center; padding-top:30px; font-style: italic; }
-	</style>
-	
-</head>
+    <script type="text/javascript">
+    $(function() {
+      $( "#preferences" ).accordion({ autoHeight: false, navigation: true });
+      $( ".accounts" ).selectable();
 
-<body>
-  <a href="http://github.com/clarkbw/Thunderbird-Mega-Preferences"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
+      $("form input[default]").each(function () {
+        $(this).attr("checked", "checked");
+        $("[requires=" + $(this).attr("id") + "]").show();
+        //$("[unless=" + $(this).attr("id") + "]").show();
+      });
 
-  <div id="container">
+      // Handle all checkbox clicks and allow a cascading of required items
+      $("form input:checkbox").click(function () {
+        var id = $(this).attr("id"),
+            requires = $("[requires="+id+"]"),
+            unless = $("[unless="+id+"]"),
+            checked = $(this).is(":checked");
 
-    <div class="download">
-      <a href="http://github.com/clarkbw/Thunderbird-Mega-Preferences/zipball/master">
-        <img border="0" width="90" src="http://github.com/images/modules/download/zip.png"></a>
-      <a href="http://github.com/clarkbw/Thunderbird-Mega-Preferences/tarball/master">
-        <img border="0" width="90" src="http://github.com/images/modules/download/tar.png"></a>
-    </div>
+        if (checked) {
+          cascade(requires, false);
+          cascade(unless, true);
+        } else {
+          cascade(requires, true);
+          cascade(unless, false);
+        }
+      });
 
-    <h1><a href="http://github.com/clarkbw/Thunderbird-Mega-Preferences">Thunderbird-Mega-Preferences</a>
-      <span class="small">by <a href="http://github.com/clarkbw">clarkbw</a></span></h1>
+      $("form input:radio").change(function () {
+        var name = $(this).attr("name"),
+            id = $(this).attr("id"),
+            requires = $("[requires="+id+"]"),
+            unless = $("[unless="+id+"]");
 
-    <div class="description">
-      A new look at Thunderbird preferences orgranized and cleanly designed
-    </div>
+        cascade(requires, false);
+        cascade(unless, true);
 
-    <p>I'll be adding the mockups here soon</p><h2>Contact</h2>
-<p>Bryan Clark (clarkbw@gmail.com)<br/>      </p>
+        // Find all the other radio elements besides this one and cascade the changes around
+        $("form input[name=" + name + "]:radio").not("[id=" + id + "]").each(function () {
+          var id = $(this).attr("id"),
+              requires = $("[requires="+id+"]"),
+              unless = $("[unless="+id+"]");
+          cascade(requires, true);
+          cascade(unless, false);
+        });
 
+      });
 
-    <h2>Download</h2>
-    <p>
-      You can download this project in either
-      <a href="http://github.com/clarkbw/Thunderbird-Mega-Preferences/zipball/master">zip</a> or
-      <a href="http://github.com/clarkbw/Thunderbird-Mega-Preferences/tarball/master">tar</a> formats.
-    </p>
-    <p>You can also clone the project with <a href="http://git-scm.com">Git</a>
-      by running:
-      <pre>$ git clone git://github.com/clarkbw/Thunderbird-Mega-Preferences</pre>
-    </p>
+      function cascade(items, hide) {
+        if (hide) {
+          $(items).fadeOut();
+        } else {
+          $(items).fadeIn();
+        }
+        $(items).find("[id]").each(function () {
+          var id = $(this).attr("id"),
+              requires = $("[requires="+id+"]"),
+              unless = $("[unless="+id+"]");
+          if (hide || $(this).is(":checked")) {
+            cascade(requires, false);
+            cascade(unless, true);
+          } else {
+            cascade(requires, true);
+            cascade(unless, false);
+          }
+        });
 
-    <div class="footer">
-      get the source code on GitHub : <a href="http://github.com/clarkbw/Thunderbird-Mega-Preferences">clarkbw/Thunderbird-Mega-Preferences</a>
-    </div>
+      }
+
+    });
+    </script>
+
+  </head>
+  <body>
+  <div id="preferences">
+      <h3><a href="#general">General</a></h3>
+      <div>
+        <div class="section">
+        <form>
+          <div><input type="checkbox" default id="start_page"> <label for="start_page">Show start page when Shredder launches</label></div>
+          <div requires="start_page"><input type="checkbox" style="visibility:hidden;"> <input type="text" style="width:50em" value="https://live.mozillamessaging.com/thunderbird/start?locale=en-US&version=3.3a2pre&os=Darwin&buildid=20101222030014"></div>
+        </form>
+        <form>
+          <h4>When new messages arrive</h4>
+          <div><input type="checkbox" id="play_sound"> <label for="play_sound">Play Sound</label></div>
+          <div class="sub" requires="play_sound">
+            <div><input type="radio" default id="system_sound" value="system" name="sounds"> <label for="system_sound">System Sound</label></div>
+            <div><input type="radio" value="custom" id="custom_sound" name="sounds"> <label for="custom_sound">Custom Sound</label></div>
+            <div requires="custom_sound"><input type="radio" style="visibility:hidden;"> <input type="file"> <button>Play</button></div>
+          </div>
+        </form>
+        <div style="text-align:right;"><a href="">Looking for Add-ons?</a></div>
+        </div>
+      </div>
+
+      <h3><a href="#display">Display</a></h3>
+      <div>
+        <div class="section">
+          Display Content
+        </div>
+      </div>
+
+      <h3><a href="#writing">Writing</a></h3>
+      <div>
+        <div class="section">
+        <form>
+          <div><input type="checkbox" default id="compose_html"> <label for="compose_html">Compose messages in HTML <span class="default">default</span></label></div>
+          <div class="sub" requires="compose_html"><input type="checkbox" default id="compose_html_all"> <label for="compose_html_all">All Accounts</label></div>
+          <ul class="accounts sub" unless="compose_html_all">
+            <li class="ui-selected">clarkbw@gmail.com</li>
+            <li class="ui-selected">clarkbw@gnome.org</li>
+            <li class="ui-selected">clarkbw@mozillamessaging.com</li>
+          </ul>
+        </form>
+        </div>
+      </div>
+
+      <h3><a href="#reading">Reading</a></h3>
+      <div>
+        <div class="section">
+          Reading Content
+        </div>
+      </div>
+
+      <h3><a href="#attachments">Attachments</a></h3>
+      <div>
+        <div class="section">
+          Attachments Content
+        </div>
+      </div>
+
+      <h3><a href="#junk">Junk</a></h3>
+      <div>
+        <div class="section">
+          Junk Content
+        </div>
+      </div>
+
+      <h3><a href="#security">Security</a></h3>
+      <div>
+        <div class="section">
+          Security Content
+        </div>
+      </div>
+
+      <h3><a href="#web">Web</a></h3>
+      <div>
+        <div class="section">
+          Web Content
+        </div>
+      </div>
+
+      <h3 id="add-ons"><a href="#add-ons">Add-ons</a></h3>
+      <div>
+        <div class="section">
+          <p style="margin-bottom: 1em;">
+            This section makes the individual preference dialogs for each add-on more visible and accessible.
+            This could be a further improvement to the preferences system later on but is not something that is needed to
+            fix the current problems with the Preferences / Account Settings situation we have now.
+          </p>
+          <div class="add-ons">
+
+            <div class="add-on hbox boxFlex center">
+              <div class="img"><img src="https://addons.mozilla.org/en-US/firefox/images/addon_icon/252539/?modified=1291933156" /></div>
+              <div class="name center">F1 by Mozilla Labs</div>
+              <div class="version center">0.7.3</div>
+              <div class="prefs boxFlex end">
+                <button onclick="window.open('add-on-pref.html','f1-prefs','dialog=yes,dependent=yes,height=480,width=640');">preferences</button>
+              </div>
+            </div>
+
+            <div class="add-on hbox boxFlex center">
+              <div class="img"><img src="https://addons.mozilla.org/en-US/firefox/images/addon_icon/70768/?modified=1285330821" /></div>
+              <div class="name center">Google Calendar Tab</div>
+              <div class="version center">3.5</div>
+              <div class="prefs boxFlex end">
+                <button onclick="window.open('add-on-pref.html','f1-prefs','dialog=yes,dependent=yes,height=480,width=640');">preferences</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <h3><a href="#lightning">Lightning</a></h3>
+      <div>
+        <div class="section">
+          A whole section created by an extension for Lightning specific preferences.  This mimics how Lightning and other existing
+          extensions currently add themselves to the preferences panel.
+        </div>
+      </div>
 
   </div>
-
-  
-</body>
+  </body>
 </html>
