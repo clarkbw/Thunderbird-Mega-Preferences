@@ -170,7 +170,7 @@
         var w = 200,
             h = 200,
             r = w / 2,
-            a = pv.Scale.linear(0, pv.sum(data)).range(0, 2 * Math.PI);
+            total = data.reduce(function(p, c) {return p + c; });
 
         /* The root panel. */
         var vis = new pv.Panel()
@@ -184,7 +184,7 @@
             .left(w / 2)
             .innerRadius(r - (w / 3))
             .outerRadius(r)
-            .angle(a)
+            .angle(function(d) { return d * ((2 * Math.PI) / total) * vis.proportion})
             .anchor("center").add(pv.Label)
             .visible(function(d) d > .15)
             .textAngle(0)
@@ -197,10 +197,18 @@
             .left(r)
             .top(r + 10)
             .textAlign("center")
-            .text(data.reduce(function (p,c,i,a) { return p + c; }) + " MB");
+            .text(total + " MB");
 
 
-        vis.render();
+        // animate, for effect
+        vis.proportion = 0;
+        var interval = setInterval(function() {
+          vis.proportion += 0.05;
+          if (vis.proportion > 1) {
+            clearInterval(interval);
+          }
+          vis.render();
+        }, 20);
 
         </script>
         </div>
