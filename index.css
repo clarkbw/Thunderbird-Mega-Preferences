@@ -72,6 +72,11 @@ label {
   content: ")";
 }
 
+.graph {
+  width: 200px;
+  height: 200px;
+}
+
 #add-ons {
   margin-top: 3em;
 }

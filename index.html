@@ -6,6 +6,8 @@
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.4/jquery-ui.min.js"></script>
 
+    <script type="text/javascript" src="js/protovis-d3.2.js"></script>
+
     <script type="text/javascript">
     $(function() {
       $( "#preferences" ).accordion({ autoHeight: false, navigation: true });
@@ -114,9 +116,9 @@
           <div><input type="checkbox" default id="compose_html"> <label for="compose_html">Compose messages in HTML <span class="default">default</span></label></div>
           <div class="sub" requires="compose_html"><input type="checkbox" default id="compose_html_all"> <label for="compose_html_all">All Accounts</label></div>
           <ul class="accounts sub" unless="compose_html_all">
-            <li class="ui-selected">clarkbw@gmail.com</li>
-            <li class="ui-selected">clarkbw@gnome.org</li>
-            <li class="ui-selected">clarkbw@mozillamessaging.com</li>
+            <li class="ui-selected">clarkbw@example.com</li>
+            <li class="ui-selected">clarkbw@example.org</li>
+            <li class="ui-selected">sales@example.com</li>
           </ul>
         </form>
         </div>
@@ -147,6 +149,76 @@
       <div>
         <div class="section">
           Security Content
+        </div>
+      </div>
+
+      <h3><a href="#disk-space">Disk Space</a></h3>
+      <div>
+        <div class="section">
+        <p style="margin-bottom: 1em;">
+          A quick example of a better preferences system that uses the <a href="http://vis.stanford.edu/protovis/">protovis</a> toolkit
+          to graph the results of system information and help users make better informed choices about their options.
+        </p>
+        <div class="hbox boxFlex">
+
+        <div class="graph">
+        <script type="text/javascript+protovis">
+
+        var data = pv.range(12, 60, 14);
+
+        /* Sizing and scales. */
+        var w = 200,
+            h = 200,
+            r = w / 2,
+            a = pv.Scale.linear(0, pv.sum(data)).range(0, 2 * Math.PI);
+
+        /* The root panel. */
+        var vis = new pv.Panel()
+            .width(w)
+            .height(h);
+
+        /* The wedge, with centered label. */
+        vis.add(pv.Wedge)
+            .data(data.sort(pv.reverseOrder))
+            .bottom(w / 2)
+            .left(w / 2)
+            .innerRadius(r - (w / 3))
+            .outerRadius(r)
+            .angle(a)
+            .anchor("center").add(pv.Label)
+            .visible(function(d) d > .15)
+            .textAngle(0)
+            .textStyle(pv.color("#222"))
+            .text(function(d) d.toFixed(1) + " MB");
+
+        vis.add(pv.Label)
+            .font("12px/14px sans-serif")
+            .textStyle(pv.color("#333"))
+            .left(r)
+            .top(r + 10)
+            .textAlign("center")
+            .text(data.reduce(function (p,c,i,a) { return p + c; }) + " MB");
+
+
+        vis.render();
+
+        </script>
+        </div>
+        <div class="boxFlex">
+
+          <form>
+            <div><input type="checkbox" default id="sync_messages"> <label for="sync_messages">Synchronize Messages <span class="default">default</span></label></div>
+            <div class="sub" requires="sync_messages"><input type="checkbox" default id="sync_messages_all"> <label for="sync_messages_all">All Accounts</label></div>
+            <ul class="accounts sub" unless="sync_messages_all">
+              <li class="ui-selected">clarkbw@example.com</li>
+              <li class="ui-selected">clarkbw@example.org</li>
+              <li class="ui-selected">sales@example.com</li>
+            </ul>
+          </form>
+
+        </div>
+        </div>
+
         </div>
       </div>
 
